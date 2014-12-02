@@ -1,0 +1,19 @@
+{
+	"name" : "DomoData",
+	"description" : "Home Automation Data",
+	"authors" : [{
+			"name" : "Pierre Pollet",
+			"email" : "dev4domotique@gmail.com",
+			"role" : "Developper"
+		}
+	],
+	"require" : {
+		"php" : ">=5.3",
+		"vrana/notorm" : "dev-master"
+	},
+	"support" : {
+		"source" : "https://github.com/ppollet73/Domodata",
+		"issues" : "https://github.com/ppollet73/Domodata/issues",
+		"wiki" : "https://github.com/ppollet73/Domodata/wiki"
+	}
+}
