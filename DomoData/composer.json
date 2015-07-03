@@ -9,7 +9,8 @@
 	],
 	"require" : {
 		"php" : ">=5.3",
-		"vrana/notorm" : "dev-master"
+		"vrana/notorm" : "dev-master",
+		"apache/log4php" : "~2.3"
 	},
 	"support" : {
 		"source" : "https://github.com/ppollet73/Domodata",
