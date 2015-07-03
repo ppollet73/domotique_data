@@ -6,7 +6,7 @@
  * @version 1.1
  *
  * 11/2014: Pierre POLLET 
- * 			Ajout des fonctions getPeriphList,getPeriphHistory 
+ * 			Ajout des fonctions getPeriphList,getPeriphHistory,anonymize 
  */
 class eedomus {
      var $api_user;
@@ -99,7 +99,7 @@ class eedomus {
      	}
      }
      
-     function getPeriphHistory($periphId,$dateStart,$dateEnd,$debugLevel)
+     function getPeriphHistory($periphId,$dateStart,$dateEnd,$log)
      {
         $ParamDate="";
      	if (isset($dateStart))
@@ -111,9 +111,26 @@ class eedomus {
      		$ParamDate=$ParamDate."&end_date=".urlencode($dateEnd);
      	}
      	// Requête pour la récupération de l'historique des actions
+     	$timestart=microtime(true);
      	$urlHistorique =  $this->url_server."/get?action=periph.history&periph_id=".$periphId."&api_user=".$this->api_user."&api_secret=".$this->api_secret.$ParamDate."";
-     	if ($debugLevel>0) echo "eedomus.class:".$urlHistorique."<BR>";
-     	return json_decode(utf8_encode(file_get_contents($urlHistorique)));
+     	$contents=file_get_contents($urlHistorique);
+     	// traitement du cas de l'apostrophe qui fait planter le json_decode
+     	$contents=str_replace("\\'","'",$contents);
+     	$result=json_decode(utf8_encode($contents));
+     	//$last_error=json_last_error();
+     		
+     	$timeend=microtime(true);
+     	$time=round(($timeend-$timestart),2);
+     	$log->debug(urldecode($this->anonymize($urlHistorique)));
+     	$log->info("api request took ".$time."s");
+     	
+     	return $result;
+     }
+     
+     function anonymize($url)
+     {
+     	return str_replace($this->api_secret,"*****",(str_replace($this->api_user,"****",$url)));
+     	//return $url;	
      }
 }
 
