@@ -49,23 +49,59 @@ $eedomus_apiuser  =$configFile->showParam('Eedomus','eedomus_apiuser');
 $eedomus_apisecret=$configFile->showParam('Eedomus','eedomus_apisecret');
 $eedomus->setLoginInfo($eedomus_apiuser,$eedomus_apisecret);
 
+//Slim Init
+//http://stackoverflow.com/questions/6807404/slim-json-outputs
+class mySlim extends Slim\Slim {
+	function JsonOutput($data) {
+		switch($this->request->headers->get('Accept')) {
+			case 'application/json':
+			default:
+				$this->response->headers->set('Content-Type', 'application/json');
+				$this->response->status('200');
+				$this->response->body(json_encode($data));
 
+		}
+	}
+	function XmlOutput($data){
+		$this->response->status('200');
+		$this->response->headers->set('Content-Type', 'application/xml');
+		$xml = new SimpleXMLElement('<root/>');
+		$result=array_flip($data);
+		array_walk_recursive($result, array ($xml, 'addChild'));
+
+		$this->response->body($xml->asXML());
+
+	}
+}
+$app = new mySlim(
+		array(
+				'debug' => TRUE,
+				'templates.path' => './Library/CustomErrors'
+		));
+
+// notFound page Init
+$app->notFound(function () use ($app) {
+	//TODO améliorer la présentation de cette page
+	$app->render('Custom404.html');
+});
+
+/********************************
+*       FIN INITIALISATION
+*********************************/
 
 /**************************************
- *
- * Meteo part
- *
+ * Get Periphs Data through API
  ***************************************/
 /**  @SWG\Resource(
  *   apiVersion="0.0.11",
  *   swaggerVersion="1.2",
- *   basePath="http://localhost:8080/api",
+ *   basePath="https://localhost/api",
  *   resourcePath="meteo",
  *   description="Meteo operations",
  *   produces="['application/json','application/xml','text/plain','text/html']"
 * )
 */
-$app->get('/meteo/tempressentie/:temp/:wind/:unit', function ($temp,$wind,$unit) use ($app,$eedomus){
+$app->get('/periphs/data', function() use ($app,$log,$eedomus,$Db){
 	//TODO gerer correctement le retour xml
 		
 	/**
@@ -135,102 +171,36 @@ $app->get('/meteo/tempressentie/:temp/:wind/:unit', function ($temp,$wind,$unit)
 	 *   )
 	 * )
 	 */
-	header("Content-type: text/xml;");
-	$eedomus->TempRessentie($temp, $wind, $unit);
+	//header("Content-type: text/xml;");
+	// insert into DB characteristics of devices
+	$Db->DbLoadCaracteristiques($eedomus);
+    
+	//
+	//chargement dernières données ou historique de tous les périphs ayant Synchro = TRUE
+	$Db->DbLoadPeriphsData($eedomus,$log);
+
+	// Close DB Connexion
+	//	TODO Close DB Connexion
 });
 
-$app->put('/meteo/previsions', function () use ($app,$params,$eedomus){
-		/**
-		 *
-		 * @url PUT custom
-		 *
-		 * @SWG\Api(
-		 *   path="/meteo/previsions",
-		 *   @SWG\Operation(
-		 *     method="PUT",
-		 *     summary="update meteo forecast",
-		 *     notes="update meteo forecast<br> based on aurel's <a href='http://www.domo-blog.fr/les-previsions-meteo-avec-eedomus/'>work</a><br> Please read Aurel's article to know what Url to use",
-		 *     nickname="UpdateMeteoForecast",
-		 *     @SWG\Parameter(
-		 *       name="STORED_MeteoUrl",
-		 *       description="Url to be used",
-		 *       required=false,
-		 *       type="integer",
-		 *       format="int64",
-		 *       paramType="form",
-		 *       minimum="1.0",
-		 *       maximum="100000.0"
-		 *     ),
-		 *     @SWG\ResponseMessage(code=200, message="Succesfull return")
-		 *   )
-		 * )
-		 */
-		$meteo = new meteo($params,$eedomus);
-		$app->XmlOutput($meteo->update());
-	});
-
-$app->get('/meteo/previsions', function () use ($app,$eedomus){
-			/**
-			 *
-			 * @url GET custom
-			 *
-			 * @SWG\Api(
-			 *   path="/meteo/previsions",
-			 *   @SWG\Operation(
-			 *     method="GET",
-			 *     summary="return meteo forecast",
-			 *     notes="return meteo forecast, <br> based on aurel's <a href='http://www.domo-blog.fr/les-previsions-meteo-avec-eedomus/'>work</a>",
-			 *     nickname="ReturnMeteoForecast",
-			 *     @SWG\ResponseMessage(code=200, message="Succesfull return")
-			 *   )
-			 * )
-			 */
-			//Redirect handled by .htaccess
-		});
-
-$app->get('/meteo/vigimeteo', function () use ($app,$eedomus){
-	/**
-	 *
-	 * @url GET custom
-	 *
-	 * @SWG\Api(
-	 *   path="/meteo/vigimeteo",
-	 *   @SWG\Operation(
-	 *     method="GET",
-	 *     summary="return meteo risks",
-	 *     notes="return meteo risks, <br> based on Djmomo's <a href='http://www.planete-domotique.com/blog/2014/01/03/la-vigilance-meteo-dans-votre-box-domotique-evolue/'>work</a>",
-	 *     nickname="ReturnMeteoRisks",
-	 *     @SWG\ResponseMessage(code=200, message="Succesfull return")
-	 *   )
-	 * )
-	 */
-	$fichierXML = "../xmlFiles/carte_vigilance_meteo.xml";
-
-	$fichier = false;
-
-	// Choix entre affichage ou sauvegarde
-	/*$_GET_lower = array_change_key_case($_GET, CASE_LOWER);
-	if (isset ($_GET_lower['json']))
+/********************************
+* START DOC part
+*******************************/
+	$app->get('/api-docs/:resource', function($resource) use ($app)
 	{
-	$format = "json";
-	header('Content-Type: application/json; charset=utf-8');
-	}
-	elseif (isset ($_GET_lower['xml']))
-	$format = "xml";
-	else*/
-	//$fichier = $fichierXML;
-
-	$app->response->headers->set('Content-Type', 'application/xml');
-	$format="xml";
-	$meteo = new VigilanceMeteo($format,"Etats de vigilance météorologique des départements (métropole et outre-mer) et territoires d'outre-mer français");
-		$meteo->DonneesVigilance($fichier);
-
+		//TODO revoir la manière de créer cette page en fonction des exemples présents dans le github de swagger-ui
+		$swagger = new Swagger('.');
+		header("Content-Type: application/json");
+		echo $swagger->getResource($resource, array('output' => 'json'));
+	});
+	
+	$app->get('/api-docs/', function() use ($app)
+	{
+		$app->redirect('/swagger-docs/api-docs.json');
 	});
 
-	/*****************************************
-	 *
-	 * START Launching the slim application
-	 *
-	 *****************************************/
+/*****************************************
+* START Launching the slim application
+*****************************************/
 	$app->run();
 ?>

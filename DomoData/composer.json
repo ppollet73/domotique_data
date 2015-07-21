@@ -8,9 +8,12 @@
 		}
 	],
 	"require" : {
-		"php" : ">=5.3",
+		"php" : ">=5.4",
 		"vrana/notorm" : "dev-master",
-		"apache/log4php" : "~2.3"
+		"apache/log4php" : "~2.3",
+		"slim/slim" : "2.6.2",
+		"slim/extras" : "2.0.3",
+		"zircote/swagger-php" : "dev-master"
 	},
 	"support" : {
 		"source" : "https://github.com/ppollet73/Domodata",
