@@ -1,4 +1,11 @@
 V0.1: 2014/11
 	- upload des caractéristiques des devices en base
 	- upload de l'historique des données en base
+V0.3: 2015/07
+	- première image docker opérationnelle pour la collecte des périphériques
+	- mise en place du framework Rest
+	- mise en place de l'aide
 	
+	known issues: 
+	- pas de https
+		

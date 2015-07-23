@@ -2,6 +2,11 @@
 
 require './vendor/autoload.php';
 
+use Swagger\Annotations as SWG;
+use Swagger\Swagger;
+
+
+
 //setting TimeZone
 date_default_timezone_set("Europe/Paris");
 
@@ -88,89 +93,53 @@ $app->notFound(function () use ($app) {
 /********************************
 *       FIN INITIALISATION
 *********************************/
+/*
+ * @SWG\Info(
+ * title="Domodata API",
+ * version="0.3",
+ * description="This is a the help of Domodata framework. <br><br> The base URL for all below calls is <STRONG>http://&lt;@API&gt;/.....</STRONG><br><br> You can log issues <a href='https://github.com/ppollet73/domotique_data/issues' target=_blank>here</a>",
+ * contact="dev4domotique@gmail.com"
+ * )
+ */
+
+/*
+ * @SWG\Swagger(
+ *   schemes={"http"},
+ *   basePath="/",
+ * 	  @SWG\Tag(
+ *		name="peripheriques",
+ *		description="Toutes les operations sur les peripheriques eedomus"
+ *		)
+ *  )
+ */
+
+
 
 /**************************************
  * Get Periphs Data through API
  ***************************************/
-/**  @SWG\Resource(
- *   apiVersion="0.0.11",
- *   swaggerVersion="1.2",
- *   basePath="https://localhost/api",
- *   resourcePath="meteo",
- *   description="Meteo operations",
- *   produces="['application/json','application/xml','text/plain','text/html']"
-* )
-*/
-$app->get('/periphs/data', function() use ($app,$log,$eedomus,$Db){
-	//TODO gerer correctement le retour xml
-		
-	/**
-	 *
-	 * @url GET custom
-	 *
-	 * @SWG\Api(
-	 *   path="/meteo/tempressentie/{temp}/{vent}/{unit}",
-	 *   @SWG\Operation(
-	 *     method="GET",
-	 *     summary="temperature with chill effect",
-	 *     notes="temperature which take into account wind effect",
-	 *     type="Param",
-	 *     nickname="ChillEffectTemperature",
-	 *     @SWG\Parameter(
-	 *       name="STORED_eedomus_apiuser",
-	 *       description="userid for eedomus api",
-	 *       required=false,
-	 *       type="integer",
-	 *       format="int64",
-	 *       paramType="form",
-	 *       minimum="1.0",
-	 *       maximum="100000.0"
-	 *     ),
-	 *     @SWG\Parameter(
-	 *       name="STORED_eedomus_apisecret",
-	 *       description="userid for eedomus api",
-	 *       required=false,
-	 *       type="integer",
-	 *       format="int64",
-	 *       paramType="form",
-	 *       minimum="1.0",
-	 *       maximum="100000.0"
-	 *     ),
-	 *     @SWG\Parameter(
-	 *       name="temp",
-	 *       description="API_ID of temperature device",
-	 *       required=true,
-	 *       type="string",
-	 *       format="int64",
-	 *       paramType="path",
-	 *       minimum="1.0",
-	 *       maximum="100000.0"
-	 *     ),
-	 *     @SWG\Parameter(
-	 *       name="wind",
-	 *       description="API_ID of wind device",
-	 *       required=true,
-	 *       type="float",
-	 *       format="int64",
-	 *       paramType="path",
-	 *       minimum="1.0",
-	 *       maximum="100000.0"
-	 *     ),
-	 *     @SWG\Parameter(
-	 *       name="unit",
-	 *       description="unit choosen",
-	 *       required=true,
-	 *       type="float",
-	 *       format="int64",
-	 *       paramType="path",
-	 *       minimum="1.0",
-	 *       maximum="100000.0"
-	 *     ),
-	 *     @SWG\ResponseMessage(code=400, message=""),
-	 *     @SWG\ResponseMessage(code=404, message="")
+	/*
+	
+	 * @SWG\Get(
+	 *   path="/periphs/data",
+	 *   tags={"peripheriques"},
+	 	 *   summary="stockage des donnees des peripheriques en base",
+	 *   @SWG\Response(
+	 *     response=200,
+	 *     description="status success"
+	 *   ),
+	 *   @SWG\Response(
+	 *     response="default",
+	 *     description="an ""unexpected"" error"
 	 *   )
 	 * )
 	 */
+
+	
+$app->get('/periphs/data', function() use ($app,$log,$eedomus,$Db){
+	//TODO gerer correctement le retour xml
+		
+	
 	//header("Content-type: text/xml;");
 	// insert into DB characteristics of devices
 	$Db->DbLoadCaracteristiques($eedomus);
@@ -183,21 +152,14 @@ $app->get('/periphs/data', function() use ($app,$log,$eedomus,$Db){
 	//	TODO Close DB Connexion
 });
 
-/********************************
-* START DOC part
-*******************************/
-	$app->get('/api-docs/:resource', function($resource) use ($app)
-	{
-		//TODO revoir la manière de créer cette page en fonction des exemples présents dans le github de swagger-ui
-		$swagger = new Swagger('.');
-		header("Content-Type: application/json");
-		echo $swagger->getResource($resource, array('output' => 'json'));
+	$app->get('/', function () use ($app){
+		//$app->render ('freedom/Help.php');
+		$app->redirect ('/help/index.html');
 	});
-	
-	$app->get('/api-docs/', function() use ($app)
-	{
-		$app->redirect('/swagger-docs/api-docs.json');
-	});
+		$app->get('/help/', function () use ($app){
+			//$app->render ('freedom/Help.php');
+			$app->redirect ('/help/index.html');
+		});
 
 /*****************************************
 * START Launching the slim application
