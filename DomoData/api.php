@@ -93,7 +93,7 @@ $app->notFound(function () use ($app) {
 /********************************
 *       FIN INITIALISATION
 *********************************/
-/*
+/**
  * @SWG\Info(
  * title="Domodata API",
  * version="0.3",
@@ -102,13 +102,21 @@ $app->notFound(function () use ($app) {
  * )
  */
 
-/*
+/**
  * @SWG\Swagger(
  *   schemes={"http"},
  *   basePath="/",
  * 	  @SWG\Tag(
  *		name="peripheriques",
  *		description="Toutes les operations sur les peripheriques eedomus"
+ *		),
+ *	  @SWG\Tag(
+ *		name="logs",
+ *		description="logs du framework"
+ *		),
+ *	  @SWG\Tag(
+ *		name="help",
+ *		description="aide du framework"
  *		)
  *  )
  */
@@ -118,7 +126,7 @@ $app->notFound(function () use ($app) {
 /**************************************
  * Get Periphs Data through API
  ***************************************/
-	/*
+	/**
 	
 	 * @SWG\Get(
 	 *   path="/periphs/data",
@@ -152,14 +160,69 @@ $app->get('/periphs/data', function() use ($app,$log,$eedomus,$Db){
 	//	TODO Close DB Connexion
 });
 
-	$app->get('/', function () use ($app){
+
+/**
+ *
+ * @SWG\Get(
+ *   path="/",
+ *   tags={"help"},
+ *   summary="cette aide",
+ *   @SWG\Response(
+ *     response=200,
+ *     description="status success"
+ *   ),
+ *   @SWG\Response(
+ *     response="default",
+ *     description="an ""unexpected"" error"
+ *   )
+ * )
+ */
+$app->get('/', function() use ($app){
 		//$app->render ('freedom/Help.php');
 		$app->redirect ('/help/index.html');
 	});
-		$app->get('/help/', function () use ($app){
+
+/**
+ *
+ * @SWG\Get(
+ *   path="/help",
+ *   tags={"help"},
+ *   summary="cette aide",
+ *   @SWG\Response(
+ *     response=200,
+ *     description="status success"
+ *   ),
+ *   @SWG\Response(
+ *     response="default",
+ *     description="an ""unexpected"" error"
+ *   )
+ * )
+ */
+$app->get('/help/', function() use ($app){
 			//$app->render ('freedom/Help.php');
 			$app->redirect ('/help/index.html');
 		});
+
+/**
+*
+* @SWG\Get(
+*   path="/log",
+*   tags={"logs"},
+*   summary="pour voir la mecanique interne en live",
+*   @SWG\Response(
+*     response=200,
+*     description="status success"
+*   ),
+*   @SWG\Response(
+*     response="default",
+*     description="an ""unexpected"" error"
+*   )
+* )
+*/
+$app->get('/log/', function() use ($app){
+	$app->redirect ('./logview.html');
+			});
+			
 
 /*****************************************
 * START Launching the slim application

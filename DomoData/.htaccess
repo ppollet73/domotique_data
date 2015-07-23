@@ -1,8 +1,10 @@
 RewriteEngine On
-#RewriteBase /api/
 
 # rewrite rule to display help
 RewriteRule ^help/(.*) swagger-ui/$1 [L]
+
+# rewrite rule to display help
+RewriteRule ^log/(.*) logview.html
 
 # Rewrite rule to handle get method on xml files
 RewriteCond  %{REQUEST_METHOD}  ^GET$

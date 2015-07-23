@@ -5,7 +5,16 @@ V0.3: 2015/07
 	- première image docker opérationnelle pour la collecte des périphériques
 	- mise en place du framework Rest
 	- mise en place de l'aide
+	- ajout de l'affichage à l'écran du log
+
+
+
+To COMMIT:
+	- log to stdout for use with "docker logs"	
 	
-	known issues: 
+known issues: 
 	- pas de https
-		
+	- no log rotation	
+	- revoir les niveaux de logs
+	- choisir par conf, les niveaux de log
+	- colorization des logs
