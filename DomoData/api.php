@@ -90,9 +90,9 @@ $app->notFound(function () use ($app) {
 	$app->render('Custom404.html');
 });
 
-/********************************
+/*--------------------------------------
 *       FIN INITIALISATION
-*********************************/
+----------------------------------------*/
 /**
  * @SWG\Info(
  * title="Domodata API",
@@ -123,15 +123,16 @@ $app->notFound(function () use ($app) {
 
 
 
-/**************************************
+/*--------------------------------------
  * Get Periphs Data through API
- ***************************************/
+ ----------------------------------------*/
+$app->get('/periphs/data', function() use ($app,$log,$eedomus,$Db){
 	/**
-	
+	 *
 	 * @SWG\Get(
 	 *   path="/periphs/data",
 	 *   tags={"peripheriques"},
-	 	 *   summary="stockage des donnees des peripheriques en base",
+	 *   summary="stockage des donnees des peripheriques en base",
 	 *   @SWG\Response(
 	 *     response=200,
 	 *     description="status success"
@@ -142,9 +143,6 @@ $app->notFound(function () use ($app) {
 	 *   )
 	 * )
 	 */
-
-	
-$app->get('/periphs/data', function() use ($app,$log,$eedomus,$Db){
 	//TODO gerer correctement le retour xml
 		
 	
@@ -160,72 +158,76 @@ $app->get('/periphs/data', function() use ($app,$log,$eedomus,$Db){
 	//	TODO Close DB Connexion
 });
 
-
-/**
- *
- * @SWG\Get(
- *   path="/",
- *   tags={"help"},
- *   summary="cette aide",
- *   @SWG\Response(
- *     response=200,
- *     description="status success"
- *   ),
- *   @SWG\Response(
- *     response="default",
- *     description="an ""unexpected"" error"
- *   )
- * )
- */
+/*--------------------------------------
+ * Show help
+ ----------------------------------------*/
 $app->get('/', function() use ($app){
-		//$app->render ('freedom/Help.php');
+	/**
+	 *
+	 * @SWG\Get(
+	 *   path="/",
+	 *   tags={"help"},
+	 *   summary="cette aide",
+	 *   @SWG\Response(
+	 *     response=200,
+	 *     description="status success"
+	 *   ),
+	 *   @SWG\Response(
+	 *     response="default",
+	 *     description="an ""unexpected"" error"
+	 *   )
+	 * )
+	 */
 		$app->redirect ('/help/index.html');
 	});
 
-/**
- *
- * @SWG\Get(
- *   path="/help",
- *   tags={"help"},
- *   summary="cette aide",
- *   @SWG\Response(
- *     response=200,
- *     description="status success"
- *   ),
- *   @SWG\Response(
- *     response="default",
- *     description="an ""unexpected"" error"
- *   )
- * )
- */
 $app->get('/help/', function() use ($app){
-			//$app->render ('freedom/Help.php');
+	     /**
+		 *
+		 * @SWG\Get(
+		 *   path="/help",
+		 *   tags={"help"},
+		 *   summary="cette aide",
+		 *   @SWG\Response(
+		 *     response=200,
+		 *     description="status success"
+		 *   ),
+		 *   @SWG\Response(
+		 *     response="default",
+		 *     description="an ""unexpected"" error"
+		 *   )
+		 * )
+		 */
 			$app->redirect ('/help/index.html');
 		});
 
-/**
-*
-* @SWG\Get(
-*   path="/log",
-*   tags={"logs"},
-*   summary="pour voir la mecanique interne en live",
-*   @SWG\Response(
-*     response=200,
-*     description="status success"
-*   ),
-*   @SWG\Response(
-*     response="default",
-*     description="an ""unexpected"" error"
-*   )
-* )
-*/
+/*--------------------------------------
+ * Show Logs
+ ----------------------------------------*/
 $app->get('/log/', function() use ($app){
+	/**
+	 *
+	 * @SWG\Get(
+	 *   path="/log",
+	 *   tags={"logs"},
+	 *   summary="pour voir la mecanique interne en live",
+	 *   @SWG\Response(
+	 *     response=200,
+	 *     description="status success"
+	 *   ),
+	 *   @SWG\Response(
+	 *     response="default",
+	 *     description="an ""unexpected"" error"
+	 *   )
+	 * )
+	 */
 	$app->redirect ('./logview.html');
 			});
-			
 
-/*****************************************
+
+
+/*--------------------------------------
 * START Launching the slim application
-*****************************************/
-	$app->run();
+----------------------------------------*/
+$app->run();
 ?>

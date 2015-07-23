@@ -6,15 +6,17 @@ V0.3: 2015/07
 	- mise en place du framework Rest
 	- mise en place de l'aide
 	- ajout de l'affichage à l'écran du log
+	- log to stdout for use with "docker logs"	
 
 
 
 To COMMIT:
-	- log to stdout for use with "docker logs"	
+	
 	
 known issues: 
 	- pas de https
-	- no log rotation	
+	- no log rotation --> cron dans le container ?	
 	- revoir les niveaux de logs
 	- choisir par conf, les niveaux de log
 	- colorization des logs
+	- custom404 Page
