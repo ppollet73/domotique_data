@@ -234,7 +234,7 @@ class Db{
 		
 		foreach ($Rooms as $Room)
 		{
-			echo "<optgroup label=\"".utf8_decode($Room["RoomsEedomusLabel"])."\">\n";
+			echo "<optgroup label=\"".$Room["RoomsEedomusLabel"]."\">\n";
 			$Devices->where("Rooms_idRooms",$Room["idRooms"]);
 
 			foreach ($Devices as $Device)
@@ -245,7 +245,7 @@ class Db{
 				{
 					$Selected="selected=\"selected\"";
 				}
-				echo "<option class=\"peripheriques\" value=\"".$Device["idDevices"] ."\" " .$Selected." >".$DeviceName."</option>\n";				
+				echo "<option class=\"peripheriques\" value=\"".$Device["idDevices"] ."\" " .$Selected." >".utf8_encode($DeviceName)."</option>\n";				
 			}
 			$Devices->ResetWhere();
 			echo "</optgroup>\n";

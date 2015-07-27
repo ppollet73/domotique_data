@@ -7,10 +7,19 @@ V0.3: 2015/07
 	- mise en place de l'aide
 	- ajout de l'affichage à l'écran du log
 	- log to stdout for use with "docker logs"	
+	- Karotz ColorTemp
+	- custom404 Page
+	- Vigilance Météo
+	- prévisions Météo
 
-
-
-To COMMIT:
+In Dev:
+	- Webui pour choisir les périphériques à synchroniser
+	
+To Test:
+	- Karotz ColorTemp
+	- Transfert d'appel
+	- Vigilance météo
+	- Prévisions Météo
 	
 	
 known issues: 
@@ -19,4 +28,9 @@ known issues:
 	- revoir les niveaux de logs
 	- choisir par conf, les niveaux de log
 	- colorization des logs
-	- custom404 Page
+	- plus de détails dans swagger (définitions ?)
+	- gérer les codes retours des fonctions via SLIM
+	- html5 web worker to stop & start log reading (w3school)
+	- problème sur l'envoi de paramètres via Swagger-ui (c'est le nom du paramètre et pas sa valeur qui est envoyée)
+	- générer un fichier statique pour les données de vigilance, qui n'est ré-actualiser que toutes les 6h
+	- description des paramètres de prévisions météo

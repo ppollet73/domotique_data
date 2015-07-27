@@ -8,7 +8,7 @@ RewriteRule ^help/(.*) swagger-ui/$1 [L]
 
 # Rewrite rule to handle get method on xml files
 RewriteCond  %{REQUEST_METHOD}  ^GET$
-RewriteRule ^/meteo/previsions xmlFiles/previsions.xml [L]
+#RewriteRule ^/meteo/previsions xml/previsions.xml [L]
 
 # General rewrite rule
 RewriteCond %{REQUEST_FILENAME} !-f
