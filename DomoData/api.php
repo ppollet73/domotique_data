@@ -122,6 +122,10 @@ $app->notFound(function () use ($log,$app) {
  *		name="meteo",
  *		description="previsions, risque et vigilance"
  *		)
+ *    @SWG\Tag(
+ *		name="freebox",
+ *		description="opérations sur la freebox"
+ *		)
  *  )
  */
 
@@ -182,7 +186,6 @@ $app->put('/karotz/colortemp/:TempId/:KarotzIp', function($TempId,$KarotzIp) use
 	*   ),
 	*   @SWG\Parameter(
 	*    name="TempId",
-    *    in="integer",
     *    description="Api Id du peripherique de temperature",
     *    required=true,
     *    type="integer",
@@ -190,7 +193,6 @@ $app->put('/karotz/colortemp/:TempId/:KarotzIp', function($TempId,$KarotzIp) use
 	*   ),
 	*   @SWG\Parameter(
 	*    name="KarotzIp",
-    *    in="ip",
     *    description="adresse @ip du Karotz",
     *    required=true,
     *    type="integer",
@@ -249,7 +251,6 @@ $app->put('/meteo/previsions/:key/:ville', function ($key,$ville) use ($app,$log
 	 *   ),
 	*   @SWG\Parameter(
 	*    name="key",
-    *    in="integer",
     *    description="ApiKey de weather Online",
     *    required=true,
     *    type="integer",
@@ -257,7 +258,6 @@ $app->put('/meteo/previsions/:key/:ville', function ($key,$ville) use ($app,$log
 	*   ),
 	*   @SWG\Parameter(
 	*    name="ville",
-    *    in="string",
     *    description="Nom de la ville",
     *    required=true,
     *    type="string",
@@ -362,10 +362,38 @@ $app->get('/log/', function() use ($app,$log){
  * Freebox Console
  ----------------------------------------*/
 $app->put('/freebox/TransfertAppel/:Action/:NumTel', function($Action,$NumTel) use ($app,$log){	
-	
+	/**
+	 *
+	 * @SWG\Get(
+	 *   path="path="/freebox/TransfertAppel/{Action}/{NumTel}",
+	 *   tags={"freebox"},
+	 *   summary="stockage des donnees des peripheriques en base",
+	 *   @SWG\Response(
+	 *     response=200,
+	 *     description="status success"
+	 *   ),
+	 *   @SWG\Response(
+	 *     response="default",
+	 *     description="an ""unexpected"" error"
+	 *   ),
+	 * @SWG\Parameter(
+	*    name="Action",
+    *    description="Activation ou desactivation du transfert ON/OFF",
+    *    required=true,
+    *    type="integer",
+    *    format="int64"
+	*   ),
+	*   @SWG\NumTel(
+	*    name="Numero de telephone",
+    *    description="Numero vers lequel le transfert doit se faire",
+    *    required=true,
+    *    type="string",
+    *    format="string"
+	*   )
+	 * )
+	 */
 	$log->info("Enter route PUT:/freebox/TransfertAppel/:Action/:NumTel");
-	$freeboxConsoleLogin="0476088439";
-	$freeboxConsolePassword="a7b4c1d5";
+
 
 	// Connectez-vous en utilisant vos identifiants (le login est freebox par défaut).
 	$freeboxConsole = new FreeboxConsole($log,'http://subscribe.free.fr/login', $freeboxConsoleLogin, $freeboxConsolePassword );
