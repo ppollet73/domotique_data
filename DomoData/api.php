@@ -40,6 +40,7 @@ $log->info("------------------------- NEW CONNECTION ---------------------------
 // config File read
 $configFile=new ReadConfigFile;
 
+
 //DB Connexion
 $Db=new Db($configFile);
 
@@ -48,6 +49,11 @@ $eedomus = new eeDomus($configFile);
 $eedomus_apiuser  =$configFile->showParam('Eedomus','eedomus_apiuser');
 $eedomus_apisecret=$configFile->showParam('Eedomus','eedomus_apisecret');
 $eedomus->setLoginInfo($eedomus_apiuser,$eedomus_apisecret);
+
+$params= new params($Db);
+
+//General Parameter
+$DelayBetweenApiCalls = $configFile->showParam('General','DelayBetweenApiCalls');
 
 //Slim Init
 //http://stackoverflow.com/questions/6807404/slim-json-outputs
@@ -121,10 +127,14 @@ $app->notFound(function () use ($log,$app) {
  *	  @SWG\Tag(
  *		name="meteo",
  *		description="previsions, risque et vigilance"
- *		)
+ *		),
  *    @SWG\Tag(
  *		name="freebox",
- *		description="opérations sur la freebox"
+ *		description="operations sur la freebox"
+ *		),
+ *    @SWG\Tag(
+ *		name="Parametres",
+ *		description="Operations sur les parametres"
  *		)
  *  )
  */
@@ -132,7 +142,7 @@ $app->notFound(function () use ($log,$app) {
 /*--------------------------------------
  * Get Periphs Data through API
  ----------------------------------------*/
-$app->get('/periphs/data', function() use ($app,$log,$eedomus,$Db){
+$app->get('/periphs/data', function() use ($app,$log,$eedomus,$Db,$DelayBetweenApiCalls){
 	/**
 	 *
 	 * @SWG\Get(
@@ -158,7 +168,7 @@ $app->get('/periphs/data', function() use ($app,$log,$eedomus,$Db){
     
 	//
 	//chargement dernières données ou historique de tous les périphs ayant Synchro = TRUE
-	$Db->DbLoadPeriphsData($eedomus,$log);
+	$Db->DbLoadPeriphsData($eedomus,$DelayBetweenApiCalls,$log);
 
 	// Close DB Connexion
 	//	TODO Close DB Connexion
@@ -186,6 +196,7 @@ $app->put('/karotz/colortemp/:TempId/:KarotzIp', function($TempId,$KarotzIp) use
 	*   ),
 	*   @SWG\Parameter(
 	*    name="TempId",
+	*    in="path",
     *    description="Api Id du peripherique de temperature",
     *    required=true,
     *    type="integer",
@@ -193,6 +204,7 @@ $app->put('/karotz/colortemp/:TempId/:KarotzIp', function($TempId,$KarotzIp) use
 	*   ),
 	*   @SWG\Parameter(
 	*    name="KarotzIp",
+	*    in="path",
     *    description="adresse @ip du Karotz",
     *    required=true,
     *    type="integer",
@@ -252,6 +264,7 @@ $app->put('/meteo/previsions/:key/:ville', function ($key,$ville) use ($app,$log
 	*   @SWG\Parameter(
 	*    name="key",
     *    description="ApiKey de weather Online",
+    *    in="path",
     *    required=true,
     *    type="integer",
     *    format="int64"
@@ -259,6 +272,7 @@ $app->put('/meteo/previsions/:key/:ville', function ($key,$ville) use ($app,$log
 	*   @SWG\Parameter(
 	*    name="ville",
     *    description="Nom de la ville",
+    *    in="path",
     *    required=true,
     *    type="string",
     *    format="string"
@@ -365,7 +379,7 @@ $app->put('/freebox/TransfertAppel/:Action/:NumTel', function($Action,$NumTel) u
 	/**
 	 *
 	 * @SWG\Get(
-	 *   path="path="/freebox/TransfertAppel/{Action}/{NumTel}",
+	 *   path="/freebox/TransfertAppel/{Action}/{NumTel}",
 	 *   tags={"freebox"},
 	 *   summary="stockage des donnees des peripheriques en base",
 	 *   @SWG\Response(
@@ -378,13 +392,15 @@ $app->put('/freebox/TransfertAppel/:Action/:NumTel', function($Action,$NumTel) u
 	 *   ),
 	 * @SWG\Parameter(
 	*    name="Action",
+	*    in="path",
     *    description="Activation ou desactivation du transfert ON/OFF",
     *    required=true,
-    *    type="integer",
-    *    format="int64"
+    *    type="string",
+    *    format="string"
 	*   ),
-	*   @SWG\NumTel(
-	*    name="Numero de telephone",
+	*   @SWG\Parameter(
+	*    name="NumTel",
+	*    in="path",
     *    description="Numero vers lequel le transfert doit se faire",
     *    required=true,
     *    type="string",
@@ -414,6 +430,170 @@ $app->put('/freebox/TransfertAppel/:Action/:NumTel', function($Action,$NumTel) u
 	
 	print_r( $resultat );
 });
+
+/*--------------------------------------
+ * Stored Parameters Management
+/*--------------------------------------*/
+ 
+$app->post('/param/:id/:value', function ($id,$value)use ($app,$params) {
+	/**
+	 *
+	 * @url POST custom
+	 *
+	 * @SWG\Post(
+	 *   path="/param/{paramName}/{paramValue}",
+	 *   tags={"Parametres"},
+	 *   summary="Create a param",
+	 *   description="Create a new parameter stored in DB",
+	 *   @SWG\Response(
+	 *     response=200,
+	 *     description="status success"
+	 *   ),
+	 *     @SWG\Parameter(
+	 *       name="paramName",
+	 *       description="Name of the parameter that need to be created",
+	 *		 in="path",
+	 *       type="string",
+	 *       required=true,
+	 *       format="int64",
+	 *       minimum="1.0",
+	 *       maximum="100000.0"
+	 *     ),
+	 *     @SWG\Parameter(
+	 *       name="paramValue",
+	 *       description="Value of the parameter to be set",
+	 *		 in="path",
+	 *       type="string",
+	 *       required=true,
+	 *       format="int64",
+	 *       minimum="1.0",
+	 *       maximum="100000.0"
+	 *     )
+	 * )
+	 */
+	$app->JsonOutput(array(
+			'error' => FALSE,
+			'msg' => $params->add($id,$value),
+			'status' => 200,
+	));
+});
+
+$app->put('/param/:id/:value', function ($id,$value)use ($app,$params) {
+	/**
+	 *
+	 * @url UPDATE custom
+	 *
+	 * @SWG\Put(
+	 *   path="/param/{paramName}/{paramValue}",
+	 *   tags={"Parametres"},
+     *   summary="change a parameter value",
+	 *   description="This will affect {paramValue} to {paramName} ",
+	 *   @SWG\Response(
+	 *     response=200,
+	 *     description="status success"
+	 *   ),
+	 *     @SWG\Parameter(
+	 *       name="paramName",
+	 *		 in="path",
+	 *       description="Name of the parameter",
+	 *       required=true,
+	 *       type="string",
+	 *       format="int64",
+	 *       minimum="1.0",
+	 *       maximum="100000.0"
+	 *     )
+	 * )
+	 */
+	$app->JsonOutput(array(
+			'error' => FALSE,
+			'msg' => $params->add($id,$value),
+			'status' => 200,
+	));
+});
+
+$app->delete('/param/:id', function ($id) use ($app,$params) {
+	/**
+	 *
+	 * @url DELETE custom
+	 *
+	 * @SWG\Delete(
+	 *   path="/param/{paramName}",
+	 *   tags={"Parametres"},
+	 *   summary="Delete a param",
+	 *   description="Delete a parameter stored in DB",
+	 *   @SWG\Response(
+	 *     response=200,
+	 *     description="status success"
+	 *   ),
+	 *     @SWG\Parameter(
+	 *       name="paramName",
+	 *		 in="path",
+	 *       description="Name of the parameter that need to be deleted",
+	 *       required=true,
+	 *       type="string",
+	 *       format="int64",
+	 *       minimum="1.0",
+	 *       maximum="100000.0"
+	 *     ),
+	 * )
+	 */
+	$app->JsonOutput(array(
+			'error' => FALSE,
+			'msg' => $params->delete($id),
+			'status' => 200,
+	));
+
+});
+
+$app->get('/param/:id', function($id) use ($app,$params) {
+	/**
+	 *
+	 * @url GET custom
+	 *
+	 * @SWG\Get(
+	 *   path="/param/{paramName}",
+	 *   tags={"Parametres"},
+	 *     summary="Retrieve a param",
+	 *     description="Retrieve a parameter stored in DB",
+	 *   @SWG\Response(
+	 *     response=200,
+	 *     description="status success"
+	 *   ),
+	 *     @SWG\Parameter(
+	 *       name="paramName",
+	 *		 in="path",
+	 *       description="Name of the parameter that need to be retrieved",
+	 *       required=true,
+	 *       type="string",
+	 *       format="int64",
+	 *       minimum="1.0",
+	 *       maximum="100000.0"
+	 *     ),
+	 * )
+	 */
+	//TODO ajouter la possibilité de choisir entre XML et JSON
+	$app->XmlOutput($params->showParam($id));
+});
+
+$app->get('/param/', function() use ($app,$params) {
+	/**
+	 *
+	 * @url GET custom
+	 *
+	 * @SWG\Get(
+	 *   path="/param/",
+	 *   tags={"Parametres"},
+	 *     summary="Retrieve all parameters",
+	 *     description="Retrieve all the parameters stored in DB",
+	 *   @SWG\Response(
+	 *     response=200,
+	 *     description="status success"
+	 *   )
+	 * )
+	 */
+	$app->XmlOutput($params->showParam(''));
+});
+
 /*--------------------------------------
 * Run slim application
 ----------------------------------------*/

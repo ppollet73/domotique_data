@@ -41,7 +41,7 @@ class Db{
 		}
 	}
 	
-	function DbLoadPeriphData($Eedomus,$PeriphId,$dateStart,$dateEnd,$log)
+	function DbLoadPeriphData($Eedomus,$PeriphId,$dateStart,$dateEnd,$DelayBetweenApiCalls,$log)
 	/*
 	 * Charge les données d'un périphérique (y compris l'historique)
 	*/
@@ -67,23 +67,32 @@ class Db{
 			$log->debug("Start Date for Datacollection is ".$dateStart);
 			$timestart=microtime(true);
 			set_time_limit(400);
+			//
+			$log->debug("Pause of ". $DelayBetweenApiCalls . "s between api calls");
+			sleep($DelayBetweenApiCalls);
 			// Réquête pour la récupération de l'historique des actions
 			$periphHistory= $Eedomus->getPeriphHistory($PeriphId,$dateStart,$dateEnd,$log);
-			//var_dump($periphHistory);
+
 			if (!isset($periphHistory->body->history))
 			{
-				$log->debug("Issue when Getting History for:".$PeriphId);
-				$log->debug("Error is: ".$periphHistory->body->error_msg);
-				//$log->debug("DEBUG:".$periphHistory);
-				//print_r($periphHistory);
+				$log->debug("Issue when Getting History for:".$PeriphId ." with Error: ".$periphHistory->body->error_msg);
+
+				if ($periphHistory->body->error_msg = "Peripheral does not exists")
+				{
+					// si l'erreur est "Peripheral does not exists", on marque le périphérique comme deleted
+					$periph=array("Deleted" => 1);
+					$log->debug("Periph ".$PeriphId." marked as deleted");
+					$this->db->devices()->insert_update(array("idDevices" => $PeriphId),$periph,$periph);
+				}
+				
 				$periphHistoryData=null;
+				$ImportHistory=FALSE;
 			}
 			else 
 			{
 				$periphHistoryData=$periphHistory->body->history;
 			}
 	
-			
 			/*permet de savoir combien il y a de valeur historisé et de ne rien faire si il n'y en a qu'une puisque l'api  
 			/*eedomus retourne toujours au moins une ligne
 			*/
@@ -156,10 +165,17 @@ class Db{
 			}
 			$timeend=microtime(true);
 			$time=round(($timeend-$timestart)*1000,0);
-			$log->info("Insert in DB took ".$time."ms for ".($NbRows-1)." rows imported");
+			if ($NBRows >1)
+			{
+				$log->debug("Insert in DB took ".$time."ms for ".($NbRows-1)." rows imported");
+			}
+			else
+			{
+				$log->debug("Nothing new to import");
+			}
 			// re-initialisation a TRUE pour la prochaine itération
 			$FirstRow=TRUE;
-			//$DEBUG=$DEBUG+1;
+			
 		}
 		while(isset($periphHistory) && isset($periphHistory->history_overflow) && $periphHistory->history_overflow == 10000);// && $DEBUG<3);
 	
@@ -171,52 +187,79 @@ class Db{
 		}
 		$timeendTotal=microtime(true);
 		$timeTotal=round(($timeendTotal-$timestartTotal),1);
-		$log->info("Total Insert in DB took ".$timeTotal."s for ".$NbImportedRows." rows imported");
+		if ($NBRows >1)
+		{
+			$log->info("Total Insert in DB took ".$timeTotal."s for ".$NbImportedRows." rows imported");
+		}
+		else
+		{
+			$log->info("Nothing imported");
+		}
 		
 	}
 	
-	function DbLoadPeriphsData($Eedomus,$log)
+	function DbLoadPeriphsData($Eedomus,$DelayBetweenApiCalls,$log)
 	/*
 	 * Charge les données de tous les périphériques en base
 	 */
 	{
 		$log->info("Start update of all devices");
 		
-		// boucle sur tous les devices ayant le champ DevicesSynchro a TRUE
-		$Devices = $this->db->Devices()
-		    ->select("idDevices, DevicesLastUpdated, DevicesEedomusLabel,DevicesHistoryImported,DevicesFirstKnownHistory")
-		    ->where("DevicesSynchro=1") 
-		    ->order("idDevices")
-			;
-
-		// import des données de tous les devices correspondants
-		foreach ($Devices as $Device) 
-			{ 
+		//ajout d'une protection pour empêcher deux lancement en //
+		$fp = fopen("/tmp/DbLoadPeriphsData.lck", "w+");
+		$locked=flock($fp, LOCK_EX | LOCK_NB);  // exclusive non blocking lock
+		$log->trace("lock status:". $locked);
+		
+		if ($locked) {
+			fwrite($fp, getmypid());
+			fflush($fp);			// libère le contenu avant d'enlever le verrou
+	
+			// boucle sur tous les devices ayant le champ DevicesSynchro a TRUE
+			$Devices = $this->db->Devices()
+			    ->select("idDevices, DevicesLastUpdated, DevicesEedomusLabel,DevicesHistoryImported,DevicesFirstKnownHistory")
+			    ->where("DevicesSynchro=1")
+			    ->and("Deleted=0")
+			    ->order("idDevices")
+				;
+	
 			// import des données de tous les devices correspondants
-			$DeviceName=utf8_decode($Device["DevicesEedomusLabel"]);
-			/* si DevicesFirstKnownHistory != '' et DevicesHistoryImported = 0 alors
-			 * alors l'import de l'historique n'a pas réussi.
-			 * on relance l'import de l'historique
-			 * la récupération des dernières données ne se fera qu'au lancement suivant
-			 */
-			$log->debug("---------------------------------------------");
-			if (isset($Device["DevicesFirstKnownHistory"]) && $Device["DevicesHistoryImported"]==0)
-				{
-				$log->info("Recovering history of ".$DeviceName."(".$Device["idDevices"].")");
-				$this->DbLoadPeriphData($Eedomus,$Device["idDevices"],"2000-01-01 00:00:00",$Device["DevicesFirstKnownHistory"],$log);
-				$log->info("End of Recovering history of ".$DeviceName."(".$Device["idDevices"].")");
+			foreach ($Devices as $Device) 
+				{ 
+				// import des données de tous les devices correspondants
+				$DeviceName=utf8_decode($Device["DevicesEedomusLabel"]);
+				/* si DevicesFirstKnownHistory != '' et DevicesHistoryImported = 0 alors
+				 * alors l'import de l'historique n'a pas réussi.
+				 * on relance l'import de l'historique
+				 * la récupération des dernières données ne se fera qu'au lancement suivant
+				 */
+				$log->debug("---------------------------------------------");
+				if (isset($Device["DevicesFirstKnownHistory"]) && $Device["DevicesHistoryImported"]==0)
+					{
+					$log->info("Recovering history of ".$DeviceName."(".$Device["idDevices"].")");
+					$this->DbLoadPeriphData($Eedomus,$Device["idDevices"],"2000-01-01 00:00:00",$Device["DevicesFirstKnownHistory"],$DelayBetweenApiCalls,$log);
+					$log->info("End of Recovering history of ".$DeviceName."(".$Device["idDevices"].")");
+					}
+				else 
+					// on ne recupere que les dernières données
+					{
+					$log->info("Start Updating ".$DeviceName."(".$Device["idDevices"].")");
+					$this->DbLoadPeriphData($Eedomus,$Device["idDevices"],$Device["DevicesLastUpdated"],null,$DelayBetweenApiCalls,$log);
+					$log->info("End  Update of ".$DeviceName."(".$Device["idDevices"].")");
+					}
+				// update the output
+				flush();
 				}
-			else 
-				// on ne recupere que les dernières données
-				{
-				$log->info("Start Updating ".$DeviceName."(".$Device["idDevices"].")");
-				$this->DbLoadPeriphData($Eedomus,$Device["idDevices"],$Device["DevicesLastUpdated"],null,$log);
-				$log->info("End  Update of ".$DeviceName."(".$Device["idDevices"].")");
-				}
-			// update the output
-			flush();
-			}
-		$log->info("End  Update of all devices");
+				flock($fp, LOCK_UN); // unlock le fichier
+				$log->info("End  Update of all devices");
+		}
+		else {
+			$log->info("Impossible to acquire lock");
+			$log->info("Update process canceled due to another process already running");
+		}
+			
+			fclose($fp);
+				
+		
 	}
 	
 	function DbGetPeriphs($log)

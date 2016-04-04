@@ -11,7 +11,8 @@ if(typeof(EventSource) !== "undefined") {
     var source = new EventSource("logsource.php");
     source.onmessage = function(event) {
     	var oldlog= document.getElementById("result").innerHTML;
-        document.getElementById("result").innerHTML = event.data + "<br>" + oldlog;
+        //document.getElementById("result").innerHTML = event.data + "<br>" + oldlog;
+    	document.getElementById("result").innerHTML = oldlog + "<br>" + event.data  ;
     };
 } else {
     document.getElementById("result").innerHTML = "Sorry, your browser does not support server-sent events...";

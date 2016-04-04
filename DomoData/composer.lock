@@ -5,6 +5,7 @@
         "This file is @generated automatically"
     ],
     "hash": "4abfd579ac9545fd7d718f2ead9b6b97",
+    "content-hash": "3617ce10ec68ddd70b067cdad1dab5f2",
     "packages": [
         {
             "name": "apache/log4php",
@@ -38,16 +39,16 @@
         },
         {
             "name": "doctrine/annotations",
-            "version": "v1.2.6",
+            "version": "v1.2.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/annotations.git",
-                "reference": "f4a91702ca3cd2e568c3736aa031ed00c3752af4"
+                "reference": "f25c8aab83e0c3e976fd7d19875f198ccf2f7535"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/annotations/zipball/f4a91702ca3cd2e568c3736aa031ed00c3752af4",
-                "reference": "f4a91702ca3cd2e568c3736aa031ed00c3752af4",
+                "url": "https://api.github.com/repos/doctrine/annotations/zipball/f25c8aab83e0c3e976fd7d19875f198ccf2f7535",
+                "reference": "f25c8aab83e0c3e976fd7d19875f198ccf2f7535",
                 "shasum": ""
             },
             "require": {
@@ -69,7 +70,7 @@
                     "Doctrine\\Common\\Annotations\\": "lib/"
                 }
             },
-            "notification-url": "http://packagist.org/downloads/",
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -102,7 +103,7 @@
                 "docblock",
                 "parser"
             ],
-            "time": "2015-06-17 12:21:22"
+            "time": "2015-08-31 12:32:49"
         },
         {
             "name": "doctrine/lexer",
@@ -257,36 +258,36 @@
         },
         {
             "name": "symfony/finder",
-            "version": "v2.7.2",
+            "version": "v3.0.4",
             "source": {
                 "type": "git",
-                "url": "https://github.com/symfony/Finder.git",
-                "reference": "ae0f363277485094edc04c9f3cbe595b183b78e4"
+                "url": "https://github.com/symfony/finder.git",
+                "reference": "c54e407b35bc098916704e9fd090da21da4c4f52"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/Finder/zipball/ae0f363277485094edc04c9f3cbe595b183b78e4",
-                "reference": "ae0f363277485094edc04c9f3cbe595b183b78e4",
+                "url": "https://api.github.com/repos/symfony/finder/zipball/c54e407b35bc098916704e9fd090da21da4c4f52",
+                "reference": "c54e407b35bc098916704e9fd090da21da4c4f52",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.3.9"
-            },
-            "require-dev": {
-                "symfony/phpunit-bridge": "~2.7"
+                "php": ">=5.5.9"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.7-dev"
+                    "dev-master": "3.0-dev"
                 }
             },
             "autoload": {
                 "psr-4": {
                     "Symfony\\Component\\Finder\\": ""
-                }
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
             },
-            "notification-url": "http://packagist.org/downloads/",
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -302,7 +303,7 @@
             ],
             "description": "Symfony Finder Component",
             "homepage": "https://symfony.com",
-            "time": "2015-07-09 16:07:40"
+            "time": "2016-03-10 11:13:05"
         },
         {
             "name": "vrana/notorm",
@@ -349,12 +350,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/zircote/swagger-php.git",
-                "reference": "bdce8bcda08384933ca2f1caac341855e21e4d50"
+                "reference": "2dbccf1c69851ab900c7dddc8084c45af8ff154c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zircote/swagger-php/zipball/bdce8bcda08384933ca2f1caac341855e21e4d50",
-                "reference": "bdce8bcda08384933ca2f1caac341855e21e4d50",
+                "url": "https://api.github.com/repos/zircote/swagger-php/zipball/2dbccf1c69851ab900c7dddc8084c45af8ff154c",
+                "reference": "2dbccf1c69851ab900c7dddc8084c45af8ff154c",
                 "shasum": ""
             },
             "require": {
@@ -363,6 +364,7 @@
                 "symfony/finder": "*"
             },
             "require-dev": {
+                "squizlabs/php_codesniffer": "2.*",
                 "zendframework/zend-form": "*"
             },
             "bin": [
@@ -401,7 +403,7 @@
                 "rest",
                 "service discovery"
             ],
-            "time": "2015-07-08 16:38:01"
+            "time": "2016-03-29 22:32:37"
         }
     ],
     "packages-dev": [],

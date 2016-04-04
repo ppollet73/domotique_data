@@ -23,6 +23,8 @@ class readconfigfile
 			$this->ConfigParams['Eedomus']['eedomus_apiuser']=getenv('eedomus_apiuser');
 			$this->ConfigParams['Eedomus']['eedomus_apisecret']=getenv('eedomus_apisecret');
 			$this->ConfigParams['Eedomus']['eedomus_adresseIp']=getenv('eedomus_adresseIp');
+			
+			$this->ConfigParams['General']['DelayBetweenApiCalls']=getenv('DelayBetweenApiCalls');
 		}
 		else
 		{

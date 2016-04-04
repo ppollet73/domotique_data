@@ -11,6 +11,10 @@ V0.3: 2015/07
 	- custom404 Page
 	- Vigilance Météo
 	- prévisions Météo
+V0.4: 2016/03
+	- les périphériques introuvables sont désormais flagués "deleted" et l'import de leurs données n'est plus tenté
+	- ajout d'une pause configurable (défaut 1sec) entre deux appels API
+	- ajout d'un système de lock pour éviter de lancer en parallèle, plusieurs récupération de données sur les périphériques
 
 In Dev:
 	- Webui pour choisir les périphériques à synchroniser
